@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: stg_luyen_tap__branches
+    description: "Grain: 1 dòng = 1 nút của cây tổ chức."
+    columns:
+      - name: branch_code
+        data_tests: [unique, not_null]
+  - name: stg_luyen_tap__customers
+    description: "Grain: 1 dòng = 1 phiên bản khách hàng (customer_id, updated_at), đã loại dòng trùng hoàn toàn."
+    data_tests:
+      - unique_combination:
+          columns: [customer_id, updated_at]
+  - name: stg_luyen_tap__accounts
+    description: "Grain: 1 dòng = 1 tài khoản."
+    columns:
+      - name: account_id
+        data_tests: [unique, not_null]
+      - name: account_type
+        data_tests:
+          - accepted_values:
+              values: ['THUONG', 'KYQUY']
+  - name: stg_luyen_tap__instruments
+    description: "Grain: 1 dòng = 1 mã chứng khoán."
+    columns:
+      - name: symbol
+        data_tests: [unique, not_null]
+  - name: stg_luyen_tap__orders
+    description: "Grain: 1 dòng = 1 lệnh. trade_date theo giờ Việt Nam."
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: side
+        data_tests:
+          - accepted_values:
+              values: ['B', 'S']
+      - name: status
+        data_tests:
+          - accepted_values:
+              values: ['FILLED', 'PARTIAL', 'CANCELLED', 'REJECTED']
+  - name: stg_luyen_tap__cash_txn
+    description: "Grain: 1 dòng = 1 giao dịch tiền. txn_date theo giờ Việt Nam."
+    columns:
+      - name: txn_id
+        data_tests: [unique, not_null]
+      - name: txn_type
+        data_tests:
+          - relationships:
+              to: ref('txn_type')
+              field: txn_type
+  - name: stg_luyen_tap__position_daily
+    description: "Grain: 1 dòng = 1 tài khoản × 1 mã × 1 ngày chụp, chỉ khi total_qty > 0."
+    data_tests:
+      - unique_combination:
+          columns: [snapshot_date, account_id, symbol]

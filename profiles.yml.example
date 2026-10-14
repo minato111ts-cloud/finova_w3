@@ -1,0 +1,13 @@
+# Chép sang ~/.dbt/profiles.yml (hoặc đặt DBT_PROFILES_DIR). Không ghi mật khẩu vào file này.
+finova_dbt_lab:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('FINOVA_PG_HOST') }}"
+      port: "{{ env_var('FINOVA_PG_PORT') | as_number }}"
+      user: "{{ env_var('FINOVA_PG_USER') }}"
+      password: "{{ env_var('FINOVA_PG_PASSWORD') }}"
+      dbname: "{{ env_var('LAB_DBNAME', 'test_scn') }}"
+      schema: "{{ env_var('LAB_SCHEMA', 'hv00') }}"   # mỗi học viên một schema riêng: hv01 … hv06
+      threads: 4

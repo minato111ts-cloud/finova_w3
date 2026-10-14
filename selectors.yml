@@ -1,0 +1,31 @@
+# Gọi dbt bằng: dbt build --selector <tên> (không dùng dbt run, INV-R2)
+selectors:
+  - name: lab_all
+    description: Toàn bộ lab, trừ snapshot minh họa
+    definition:
+      union:
+        - method: fqn
+          value: "*"
+        - exclude:
+            - method: resource_type
+              value: snapshot
+  - name: lab_raw
+    description: Staging và raw vault (hub, link, nhl, satellite); chỉ chạy test có đủ cha trong phạm vi chọn
+    definition:
+      method: tag
+      value: dv_raw
+      parents: true
+      indirect_selection: cautious
+  - name: lab_bv
+    description: View as-of, PIT và bridge của ngày D (--vars as_of_date)
+    definition:
+      union:
+        - method: tag
+          value: asof
+        - method: tag
+          value: dv_bv
+  - name: lab_gold_dv
+    description: Gold dựng từ vault (dim_customer_dv, fact_order_dv) và test của nó
+    definition:
+      method: tag
+      value: gold_dv

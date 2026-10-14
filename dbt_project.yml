@@ -1,0 +1,77 @@
+# Finova Onboarding · Lab dbt + Lakehouse: landing → staging → raw vault → business vault → as-of → gold
+name: finova_dbt_lab
+version: "1.0.0"
+config-version: 2
+profile: finova_dbt_lab
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+analysis-paths: ["analyses"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+clean-targets: ["target", "dbt_packages"]
+
+flags:
+  send_anonymous_usage_stats: false
+
+# Tham số đặt ở đây, không ghi cứng trong SQL (INV-M6)
+vars:
+  tz: "Asia/Ho_Chi_Minh"
+  date_start: "2026-02-27"
+  date_end: "2026-04-10"
+  idle_cash_min: 200000000
+  idle_sessions_min: 5
+  # --- Data Vault ---
+  bkcc: "LT"                       # mã hệ thống của khóa nghiệp vụ (business key collision code)
+  replay_batch_time: "22:00"       # ingested_ts giả lập = 22:00 ngày nghiệp vụ, giờ VN (HEL-001 Phụ lục D.3)
+  initial_load_date: "2026-02-26"  # bảng tham chiếu nạp một lần trước kỳ dữ liệu
+  lo_ts: "auto"                    # mốc dưới cửa sổ nạp: auto = max(ingested_ts) đã có; hoặc giá trị do finova-cli truyền (DEC-ELT-WINDOW)
+  hi_ts: "infinity"
+  # --- Business Vault ---
+  as_of_date: "2026-03-27"         # ngày D dựng PIT, bridge
+  cutoff_time: "06:00"             # cutoff của D = 06:00 ngày D+1 (FNV-ANL-SLV-001 §6.2)
+
+models:
+  finova_dbt_lab:
+    staging:
+      +schema: staging
+      +materialized: view
+    atomic:
+      +schema: atomic
+      raw:
+        +materialized: incremental
+        +incremental_strategy: append
+        +on_schema_change: fail
+        +tags: ["dv_raw"]
+      bv:
+        +tags: ["dv_bv"]
+    asof:
+      +schema: asof
+      +materialized: view
+      +tags: ["asof"]
+    marts:
+      +schema: mart
+      +materialized: table
+      star_w2:
+        +tags: ["gold_w2"]
+      gold_dv:
+        +tags: ["gold_dv"]
+
+snapshots:
+  finova_dbt_lab:
+    +target_schema: "{{ target.schema }}_snapshots"
+
+seeds:
+  finova_dbt_lab:
+    +schema: ref
+    exchange_holidays:
+      +column_types:
+        holiday_date: date
+        holiday_name: text
+    txn_type:
+      +column_types:
+        txn_type: text
+        direction: integer
+        txn_group: text
+        description: text

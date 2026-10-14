@@ -1,0 +1,38 @@
+version: 2
+models:
+  - name: dim_customer_dv
+    description: "Grain: 1 dòng = 1 phiên bản khách (customer_hk, valid_from_ts) + 1 dòng không xác định."
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: customer_key
+        data_type: bytea
+        constraints:
+          - type: primary_key
+      - name: customer_hk
+        data_type: bytea
+      - name: customer_id
+        data_type: text
+        constraints:
+          - type: not_null
+      - name: segment
+        data_type: text
+      - name: kyc_status
+        data_type: text
+      - name: valid_from_ts
+        data_type: timestamptz
+      - name: valid_to_ts
+        data_type: timestamptz
+      - name: is_current
+        data_type: boolean
+      - name: version_no
+        data_type: int
+  - name: fact_order_dv
+    description: "Grain: 1 dòng = 1 lệnh. customer_key là phiên bản hiệu lực tại ngày đặt lệnh (qua PIT)."
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: customer_key
+        data_tests:
+          - not_null
+          - relationships: {to: ref('dim_customer_dv'), field: customer_key}

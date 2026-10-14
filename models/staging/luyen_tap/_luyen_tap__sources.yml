@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: luyen_tap
+    description: Dữ liệu raw mô phỏng tuần 2. Giữ nguyên như nguồn, không sửa trực tiếp.
+    schema: luyen_tap_w2
+    tables:
+      - name: branches
+        description: Cây tổ chức Hội sở → khu vực → chi nhánh → PGD.
+      - name: customers
+        description: Mỗi dòng là một phiên bản của khách hàng, mốc là updated_at. Có thể có dòng trùng hoàn toàn.
+      - name: accounts
+        description: Tài khoản giao dịch; một khách có thể có nhiều tài khoản ở nhiều chi nhánh.
+      - name: instruments
+        description: Danh mục mã chứng khoán.
+      - name: orders
+        description: Lệnh đặt; order_ts là timestamptz.
+      - name: cash_txn
+        description: Giao dịch tiền; amount luôn dương, chiều tiền theo txn_type.
+      - name: position_daily
+        description: Số dư chứng khoán cuối ngày theo tài khoản × mã; chỉ có dòng khi total_qty > 0.

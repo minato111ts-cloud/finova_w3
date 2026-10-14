@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: pit_customer_daily
+    description: "Grain: 1 dòng = 1 khách × 1 ngày D. Chỉ con trỏ, không chỉ số (ADR-016 Q18)."
+    data_tests:
+      - unique_combination: {columns: [customer_hk, as_of_date]}
+  - name: bridge_customer_account
+    description: "Grain: 1 dòng = 1 tài khoản × 1 ngày D."
+    data_tests:
+      - unique_combination: {columns: [account_hk, as_of_date]}

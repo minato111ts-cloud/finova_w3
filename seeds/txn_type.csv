@@ -1,0 +1,7 @@
+txn_type,direction,txn_group,description
+DEPOSIT,1,NAP_RUT,Nạp tiền vào tài khoản
+WITHDRAW,-1,NAP_RUT,Rút tiền khỏi tài khoản
+BUY_SETTLE,-1,THANH_TOAN,Thanh toán tiền mua chứng khoán (T+2)
+SELL_SETTLE,1,THANH_TOAN,Nhận tiền bán chứng khoán (T+2)
+FEE,-1,PHI_THUE,Phí giao dịch
+TAX_SELL,-1,PHI_THUE,Thuế bán chứng khoán

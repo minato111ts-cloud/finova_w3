@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: mart_account_daily
+    description: "Grain: 1 dòng = 1 tài khoản × 1 ngày giao dịch, bảng dày. cash_balance là tiền đã thanh toán tới hết ngày; nav = cash_balance + market_value."
+    data_tests:
+      - unique_combination:
+          columns: [account_key, date_key]
+    columns:
+      - name: account_key
+        data_tests:
+          - not_null
+          - relationships: {to: ref('dim_account'), field: account_key}

@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: "Grain: 1 dòng = 1 ngày lịch. Ngày giao dịch loại thứ 7, chủ nhật và ngày trong seed exchange_holidays."
+    columns:
+      - name: date_key
+        data_tests: [unique, not_null]
+      - name: date_day
+        data_tests: [unique, not_null]
+
+  - name: dim_branch
+    description: "Grain: 1 dòng = 1 nút cây tổ chức + 1 dòng không xác định. region_code tính bằng đệ quy."
+    columns:
+      - name: branch_key
+        data_tests: [unique, not_null]
+      - name: branch_code
+        data_tests: [unique, not_null]
+
+  - name: dim_instrument
+    description: "Grain: 1 dòng = 1 mã chứng khoán + 1 dòng không xác định."
+    columns:
+      - name: instrument_key
+        data_tests: [unique, not_null]
+      - name: symbol
+        data_tests: [unique, not_null]
+
+  - name: dim_account
+    description: "Grain: 1 dòng = 1 tài khoản (SCD1) + 1 dòng không xác định."
+    columns:
+      - name: account_key
+        data_tests: [unique, not_null]
+      - name: account_id
+        data_tests: [unique, not_null]
+
+  - name: dim_customer
+    description: "Grain: 1 dòng = 1 phiên bản khách hàng (SCD2) + 1 dòng không xác định. Hiệu lực khi valid_from <= ngày < valid_to."
+    columns:
+      - name: customer_key
+        data_tests: [unique, not_null]
+    data_tests:
+      - unique_combination:
+          columns: [customer_id, valid_from]
+
+  - name: fact_order
+    description: "Grain: 1 dòng = 1 lệnh, mọi trạng thái. Khớp = status FILLED."
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: date_key
+        data_tests:
+          - relationships: {to: ref('dim_date'), field: date_key}
+      - name: account_key
+        data_tests:
+          - relationships: {to: ref('dim_account'), field: account_key}
+      - name: customer_key
+        data_tests:
+          - relationships: {to: ref('dim_customer'), field: customer_key}
+      - name: branch_key
+        data_tests:
+          - relationships: {to: ref('dim_branch'), field: branch_key}
+      - name: instrument_key
+        data_tests:
+          - relationships: {to: ref('dim_instrument'), field: instrument_key}
+
+  - name: fact_cash_txn
+    description: "Grain: 1 dòng = 1 giao dịch tiền. signed_amount dương là tiền vào tài khoản."
+    columns:
+      - name: txn_id
+        data_tests: [unique, not_null]
+      - name: direction
+        data_tests: [not_null]
+      - name: date_key
+        data_tests:
+          - relationships: {to: ref('dim_date'), field: date_key}
+      - name: account_key
+        data_tests:
+          - relationships: {to: ref('dim_account'), field: account_key}
+
+  - name: fact_position_daily
+    description: "Grain: 1 dòng = 1 tài khoản × 1 mã × 1 ngày chụp; chỉ có dòng khi total_qty > 0. Không cộng total_qty, market_value theo ngày."
+    data_tests:
+      - unique_combination:
+          columns: [snapshot_date, account_id, symbol]
+    columns:
+      - name: date_key
+        data_tests:
+          - relationships: {to: ref('dim_date'), field: date_key}
+      - name: account_key
+        data_tests:
+          - relationships: {to: ref('dim_account'), field: account_key}
+      - name: instrument_key
+        data_tests:
+          - relationships: {to: ref('dim_instrument'), field: instrument_key}

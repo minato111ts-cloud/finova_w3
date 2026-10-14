@@ -1,0 +1,111 @@
+version: 2
+
+models:
+  - name: hub_customer
+    description: "Grain: 1 dòng = 1 khách hàng (khóa nghiệp vụ customer_id)."
+    columns:
+      - name: customer_hk
+        data_tests:
+          - unique
+          - not_null
+          - dv_has_master_satellite:
+              satellite: ref('sat_customer__luyen_tap')
+              config: {severity: warn}
+  - name: hub_account
+    description: "Grain: 1 dòng = 1 tài khoản."
+    columns:
+      - name: account_hk
+        data_tests:
+          - unique
+          - not_null
+          - dv_has_master_satellite:
+              satellite: ref('sat_account__luyen_tap')
+              config: {severity: warn}
+  - name: hub_instrument
+    description: "Grain: 1 dòng = 1 mã chứng khoán."
+    columns:
+      - name: instrument_hk
+        data_tests:
+          - unique
+          - not_null
+          - dv_has_master_satellite:
+              satellite: ref('sat_instrument__luyen_tap')
+              config: {severity: warn}
+  - name: link_customer_account
+    description: "Grain: 1 dòng = 1 cặp khách × tài khoản."
+    columns:
+      - name: link_customer_account_hk
+        data_tests: [unique, not_null]
+      - name: customer_hk
+        data_tests:
+          - relationships: {to: ref('hub_customer'), field: customer_hk}
+      - name: account_hk
+        data_tests:
+          - relationships: {to: ref('hub_account'), field: account_hk}
+  - name: nhl_order
+    description: "Grain: 1 dòng = 1 lệnh (non-historized link)."
+    columns:
+      - name: order_hk
+        data_tests: [unique, not_null]
+      - name: account_hk
+        data_tests:
+          - relationships: {to: ref('hub_account'), field: account_hk}
+      - name: instrument_hk
+        data_tests:
+          - relationships: {to: ref('hub_instrument'), field: instrument_hk}
+  - name: sat_customer__luyen_tap
+    description: "Grain: 1 dòng = 1 phiên bản (customer_hk, ingested_ts)."
+    data_tests:
+      - unique_combination: {columns: [customer_hk, ingested_ts]}
+      - dv_no_redundant_versions:
+          parent_hk: customer_hk
+          config: {severity: warn}
+    columns:
+      - name: customer_hk
+        data_tests:
+          - relationships: {to: ref('hub_customer'), field: customer_hk}
+  - name: sat_account__luyen_tap
+    description: "Grain: 1 dòng = 1 phiên bản (account_hk, ingested_ts)."
+    data_tests:
+      - unique_combination: {columns: [account_hk, ingested_ts]}
+  - name: sat_instrument__luyen_tap
+    description: "Grain: 1 dòng = 1 phiên bản (instrument_hk, ingested_ts)."
+    data_tests:
+      - unique_combination: {columns: [instrument_hk, ingested_ts]}
+
+unit_tests:
+  - name: ut_sat_customer_aba_ra_ba_phien_ban
+    description: "INV-T3: A → A (nạp lại) → B → A ra 3 phiên bản; dòng nạp lại không sinh phiên bản."
+    model: sat_customer__luyen_tap
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('stg_luyen_tap__customers')
+        rows:
+          - {customer_hk: '\x01', sat_customer__luyen_tap_hd: '\x0a', segment: MASS, kyc_status: VERIFIED, ingested_ts: '2026-03-02 22:00:00+07', event_ts: '2026-03-02 00:00:00+07', record_source: t}
+          - {customer_hk: '\x01', sat_customer__luyen_tap_hd: '\x0a', segment: MASS, kyc_status: VERIFIED, ingested_ts: '2026-03-03 22:00:00+07', event_ts: '2026-03-03 00:00:00+07', record_source: t}
+          - {customer_hk: '\x01', sat_customer__luyen_tap_hd: '\x0b', segment: VIP,  kyc_status: VERIFIED, ingested_ts: '2026-03-05 22:00:00+07', event_ts: '2026-03-05 00:00:00+07', record_source: t}
+          - {customer_hk: '\x01', sat_customer__luyen_tap_hd: '\x0a', segment: MASS, kyc_status: VERIFIED, ingested_ts: '2026-03-09 22:00:00+07', event_ts: '2026-03-09 00:00:00+07', record_source: t}
+    expect:
+      rows:
+        - {segment: MASS, ingested_ts: '2026-03-02 22:00:00+07'}
+        - {segment: VIP,  ingested_ts: '2026-03-05 22:00:00+07'}
+        - {segment: MASS, ingested_ts: '2026-03-09 22:00:00+07'}
+
+  - name: ut_sat_customer_nap_lai_khong_them_dong
+    description: "PT-IDEMP: chạy incremental với nội dung trùng phiên bản mới nhất đã có thì không thêm dòng."
+    model: sat_customer__luyen_tap
+    overrides:
+      macros:
+        is_incremental: true
+    given:
+      - input: ref('stg_luyen_tap__customers')
+        rows:
+          - {customer_hk: '\x01', sat_customer__luyen_tap_hd: '\x0b', segment: VIP, kyc_status: VERIFIED, ingested_ts: '2026-03-10 22:00:00+07', event_ts: '2026-03-10 00:00:00+07', record_source: t}
+      - input: this
+        rows:
+          - {customer_hk: '\x01', hash_diff: '\x0a', ingested_ts: '2026-03-02 22:00:00+07'}
+          - {customer_hk: '\x01', hash_diff: '\x0b', ingested_ts: '2026-03-05 22:00:00+07'}
+    expect:
+      rows: []
