@@ -26,13 +26,13 @@
    $env:LAB\_SCHEMA = 'hv0X'
 
 1. Chạy dbt debug, phải ra All checks passed.
-1. **Chỉ HV1 làm bước này, làm một lần trước khi cả nhóm bắt đầu:** nạp dữ liệu raw luyen\_tap\_w2 vào database test\_scn.
+1. **Chỉ HV1 làm bước này, làm một lần trước khi cả nhóm bắt đầu:** nạp dữ liệu raw luyen\_tap\_w3 vào database test\_scn.
 
    $env:PGCLIENTENCODING = 'UTF8'
 
-   psql -h 127.0.0.1 -p 5436 -U postgres -d test\_scn -v ON\_ERROR\_STOP=1 -f data/w2\_raw\_luyen\_tap\_w2.sql
+   psql -h 127.0.0.1 -p 5436 -U postgres -d test\_scn -v ON\_ERROR\_STOP=1 -f data/w3\_raw\_luyen\_tap\_w3.sql
 
-   Script này xóa rồi tạo lại schema luyen\_tap\_w2, nên không chạy lại khi người khác đang build.
+   Script này xóa rồi tạo lại schema luyen\_tap\_w3, nên không chạy lại khi người khác đang build.
 
 Quy ước dùng lệnh dbt:
 

@@ -204,7 +204,7 @@ $env:PGCLIENTENCODING = 'UTF8'   # psql trên Windows mặc định WIN1252
 
 psql -h 127.0.0.1 -p 5436 -U postgres -d test\_scn -v ON\_ERROR\_STOP=1 `
 
-`     `-f data/w2\_raw\_luyen\_tap\_w2.sql
+`     `-f data/w3\_raw\_luyen\_tap\_w3.sql
 
 Đặt PGCLIENTENCODING vì psql trên Windows dùng bảng mã WIN1252 và làm hỏng chú thích tiếng Việt; lần chạy thử của BOOT-001 gặp lỗi character with byte sequence 0x81 in encoding "WIN1252" has no equivalent in encoding "UTF8". Script trong repo thêm \encoding UTF8 ở đầu file với cùng mục đích.
 ## **4.7 Bước 6: profiles.yml**
@@ -319,7 +319,7 @@ finova-dbt/
 
 `  `target/  logs/  dbt\_packages/   # sinh ra khi chạy, không commit
 
-Phần Silver gồm staging, atomic, asof . Phần Gold có registry ngữ nghĩa. Project lab chia đơn giản hơn: models/marts/gold\_dv/ là Gold dựng từ vault, models/marts/star\_w2/ là star schema tuần 2 giữ lại để đối chiếu.
+Phần Silver gồm staging, atomic, asof . Phần Gold có registry ngữ nghĩa. Project lab chia đơn giản hơn: models/marts/gold\_dv/ là Gold dựng từ vault, models/marts/star\_w3/ là star schema tuần 2 giữ lại để đối chiếu.
 
 *Bảng 9. Tệp cấu hình của project*
 
@@ -484,7 +484,7 @@ Header ghi phần git không giữ: mục đích, grain và mã spec. Người t
 
 Grain viết lại trong description của file yml, bắt đầu bằng "Grain: 1 dòng = …", để dbt docs hiển thị và test grain dựa vào đó.
 # **7. Lập trình theo tầng**
-Ví dụ trong mục này lấy từ project finova\_dbt\_lab và đã chạy trên dữ liệu luyen\_tap\_w2. Dữ liệu tập không có loader, nên ingested\_ts là giả lập theo quy tắc có thể chạy lại của hệ thống Lakehouse. Ở Finova, dữ liệu mang ingested\_ts giả lập (*kịch bản số liệu để kiểm tra*) phải được đánh dấu ở ctrl.source\_system.
+Ví dụ trong mục này lấy từ project finova\_dbt\_lab và đã chạy trên dữ liệu luyen\_tap\_w3. Dữ liệu tập không có loader, nên ingested\_ts là giả lập theo quy tắc có thể chạy lại của hệ thống Lakehouse. Ở Finova, dữ liệu mang ingested\_ts giả lập (*kịch bản số liệu để kiểm tra*) phải được đánh dấu ở ctrl.source\_system.
 ## **7.1 Khai báo source**
 Mỗi nguồn một file \_<nguồn>\_\_sources.yml, khai bảng và mô tả. Khi có landing, source trỏ schema landing và khai freshness để biết nguồn có về đúng hạn không.
 
@@ -494,7 +494,7 @@ sources:
 
 `  `- name: luyen\_tap
 
-`    `schema: luyen\_tap\_w2
+`    `schema: luyen\_tap\_w3
 
 `    `tables:
 
@@ -1049,7 +1049,7 @@ Nguồn bên ngoài tra ngày 08/10/2026. Trang docs.getdbt.com đối chiếu v
 |**VAULT-LH**|Vault Obsidian: Nguyên lý thiết kế hệ thống Lakehouse (LH-01…LH-30)|LH-14 schema drift; LH-27 kiểm thử nhiều tầng|
 |**VAULT-RVBV**|Vault Obsidian: Raw Vault và Business Vault|Ranh giới luật cứng, luật mềm; bốn câu hỏi xếp chỗ; khi nào dùng snapshot|
 |**LAB**|Project finova\_dbt\_lab, chạy 08/10/2026 trên PostgreSQL 16.13, Python 3.11.15|Mọi ví dụ code và con số chạy thử|
-|**W2**|Bộ tài liệu và đáp án tuần 2 (star schema bằng dbt)|Ví dụ test đối soát, quy ước grain|
+|**w3**|Bộ tài liệu và đáp án tuần 2 (star schema bằng dbt)|Ví dụ test đối soát, quy ước grain|
 
 *Bảng 27. Nguồn bên ngoài*
 

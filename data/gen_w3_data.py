@@ -1,4 +1,4 @@
-"""Sinh bộ dữ liệu raw tuần 2 cho Finova Onboarding (schema luyen_tap_w2).
+"""Sinh bộ dữ liệu raw tuần 3 cho Finova Onboarding (schema luyen_tap_w3).
 
 Năm bảng giữ đúng cột của tuần 1 (customers, accounts, branches, instruments, orders),
 thêm hai bảng mới: cash_txn (giao dịch tiền) và position_daily (số dư chứng khoán cuối ngày).
@@ -11,9 +11,9 @@ from decimal import Decimal, ROUND_HALF_UP
 from collections import defaultdict
 
 R = random.Random(20261005)
-SCHEMA = "luyen_tap_w2"
+SCHEMA = "luyen_tap_w3"
 ICT = dt.timezone(dt.timedelta(hours=7))
-OUT = "w2_raw_luyen_tap_w2.sql"
+OUT = "w3_raw_luyen_tap_w3.sql"
 
 # ---------------- Lịch giao dịch ----------------
 def trading_days(start, end):
@@ -312,10 +312,10 @@ import os
 OUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), OUT)   # ghi cạnh file script
 with open(OUT_PATH, "w", encoding="utf-8") as f:
     f.write(f"""-- =============================================================================
--- Finova Onboarding · Tuần 2 · Dữ liệu raw (mô phỏng) · schema {SCHEMA}
+-- Finova Onboarding · Tuần 3 · Dữ liệu raw (mô phỏng) · schema {SCHEMA}
 -- 5 bảng giữ đúng cột của tuần 1 + 2 bảng mới: cash_txn, position_daily.
 -- Chạy: psql -v ON_ERROR_STOP=1 -f {OUT}   (hoặc mở trong DBeaver, Execute Script)
--- Sinh bằng gen_w2_data.py, seed 20261005. Không phải dữ liệu khách hàng thật.
+-- Sinh bằng gen_w3_data.py, seed 20261005. Không phải dữ liệu khách hàng thật.
 -- =============================================================================
 drop schema if exists {SCHEMA} cascade;
 create schema {SCHEMA};

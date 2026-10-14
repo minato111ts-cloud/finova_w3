@@ -53,8 +53,8 @@ models:
     marts:
       +schema: mart
       +materialized: table
-      star_w2:
-        +tags: ["gold_w2"]
+      star_w3:
+        +tags: ["gold_w3"]
       gold_dv:
         +tags: ["gold_dv"]
 

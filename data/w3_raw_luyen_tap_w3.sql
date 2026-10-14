@@ -1,38 +1,38 @@
 -- =============================================================================
--- Finova Onboarding · Tuần 2 · Dữ liệu raw (mô phỏng) · schema luyen_tap_w2
+-- Finova Onboarding · Tuần 2 · Dữ liệu raw (mô phỏng) · schema luyen_tap_w3
 -- 5 bảng giữ đúng cột của tuần 1 + 2 bảng mới: cash_txn, position_daily.
--- Chạy: psql -v ON_ERROR_STOP=1 -f w2_raw_luyen_tap_w2.sql   (hoặc mở trong DBeaver, Execute Script)
--- Sinh bằng gen_w2_data.py, seed 20261005. Không phải dữ liệu khách hàng thật.
+-- Chạy: psql -v ON_ERROR_STOP=1 -f w3_raw_luyen_tap_w3.sql   (hoặc mở trong DBeaver, Execute Script)
+-- Sinh bằng gen_w3_data.py, seed 20261005. Không phải dữ liệu khách hàng thật.
 -- =============================================================================
-drop schema if exists luyen_tap_w2 cascade;
-create schema luyen_tap_w2;
+drop schema if exists luyen_tap_w3 cascade;
+create schema luyen_tap_w3;
 
-create table luyen_tap_w2.branches (
+create table luyen_tap_w3.branches (
   branch_code  text primary key,
   branch_name  text not null,
   parent_code  text
 );
-create table luyen_tap_w2.customers (            -- mỗi dòng là một phiên bản của khách hàng
+create table luyen_tap_w3.customers (            -- mỗi dòng là một phiên bản của khách hàng
   customer_id  text not null,
   segment      text not null,
   kyc_status   text not null,
   updated_at   date not null
 );
-create table luyen_tap_w2.accounts (
+create table luyen_tap_w3.accounts (
   account_id   text primary key,
   customer_id  text not null,
   branch_code  text not null,
   account_type text not null,
   open_date    date not null
 );
-create table luyen_tap_w2.instruments (
+create table luyen_tap_w3.instruments (
   symbol          text primary key,
   instrument_name text not null,
   exchange        text not null,
   sector          text not null,
   listing_date    date not null
 );
-create table luyen_tap_w2.orders (
+create table luyen_tap_w3.orders (
   order_id   text primary key,
   account_id text not null,
   symbol     text not null,
@@ -42,7 +42,7 @@ create table luyen_tap_w2.orders (
   order_ts   timestamptz not null,
   status     text not null              -- Filled, Partial, Cancelled, Rejected
 );
-create table luyen_tap_w2.cash_txn (         -- MỚI: giao dịch tiền; amount luôn dương, chiều theo txn_type
+create table luyen_tap_w3.cash_txn (         -- MỚI: giao dịch tiền; amount luôn dương, chiều theo txn_type
   txn_id       text primary key,
   account_id   text not null,
   txn_ts       timestamptz not null,
@@ -50,7 +50,7 @@ create table luyen_tap_w2.cash_txn (         -- MỚI: giao dịch tiền; amoun
   amount       numeric(20,2) not null,
   ref_order_id text                     -- lệnh gốc với FEE, TAX_SELL, *_SETTLE
 );
-create table luyen_tap_w2.position_daily (   -- MỚI: số dư chứng khoán cuối ngày, chỉ có dòng khi total_qty > 0
+create table luyen_tap_w3.position_daily (   -- MỚI: số dư chứng khoán cuối ngày, chỉ có dòng khi total_qty > 0
   snapshot_date date not null,
   account_id    text not null,
   symbol        text not null,
@@ -59,7 +59,7 @@ create table luyen_tap_w2.position_daily (   -- MỚI: số dư chứng khoán c
   close_price   numeric(18,2) not null, -- giá tham chiếu cuối ngày (mô phỏng)
   primary key (snapshot_date, account_id, symbol)
 );
-insert into luyen_tap_w2.branches (branch_code, branch_name, parent_code) values
+insert into luyen_tap_w3.branches (branch_code, branch_name, parent_code) values
 ('HO', 'Hội sở', null),
 ('MB', 'Khu vực miền Bắc', 'HO'),
 ('MT', 'Khu vực miền Trung', 'HO'),
@@ -71,7 +71,7 @@ insert into luyen_tap_w2.branches (branch_code, branch_name, parent_code) values
 ('HCM01', 'Chi nhánh TP.HCM 1', 'MN'),
 ('HCM02', 'Chi nhánh TP.HCM 2', 'MN'),
 ('CT01', 'Chi nhánh Cần Thơ', 'MN');
-insert into luyen_tap_w2.customers (customer_id, segment, kyc_status, updated_at) values
+insert into luyen_tap_w3.customers (customer_id, segment, kyc_status, updated_at) values
 ('LTC001', 'MASS', 'VERIFIED', '2026-02-23'),
 ('LTC002', 'MASS', 'VERIFIED', '2026-03-08'),
 ('LTC002', 'AFFLUENT', 'VERIFIED', '2026-03-11'),
@@ -117,7 +117,7 @@ insert into luyen_tap_w2.customers (customer_id, segment, kyc_status, updated_at
 ('LTC028', 'MASS', 'VERIFIED', '2026-03-07'),
 ('LTC029', 'AFFLUENT', 'VERIFIED', '2026-02-20'),
 ('LTC030', 'VIP', 'VERIFIED', '2026-03-06');
-insert into luyen_tap_w2.accounts (account_id, customer_id, branch_code, account_type, open_date) values
+insert into luyen_tap_w3.accounts (account_id, customer_id, branch_code, account_type, open_date) values
 ('LTA001', 'LTC001', 'HP01', 'THUONG', '2023-02-10'),
 ('LTA002', 'LTC002', 'HN02', 'THUONG', '2025-04-03'),
 ('LTA003', 'LTC003', 'HCM02', 'THUONG', '2024-06-01'),
@@ -158,7 +158,7 @@ insert into luyen_tap_w2.accounts (account_id, customer_id, branch_code, account
 ('LTA038', 'LTC028', 'HN02', 'THUONG', '2022-07-01'),
 ('LTA039', 'LTC029', 'HCM02', 'THUONG', '2025-06-01'),
 ('LTA040', 'LTC030', 'HCM01', 'THUONG', '2022-01-30');
-insert into luyen_tap_w2.instruments (symbol, instrument_name, exchange, sector, listing_date) values
+insert into luyen_tap_w3.instruments (symbol, instrument_name, exchange, sector, listing_date) values
 ('ACB', 'CTCP mã ACB (mô phỏng)', 'HOSE', 'Financials', '2006-01-31'),
 ('BID', 'CTCP mã BID (mô phỏng)', 'HOSE', 'Financials', '2013-08-23'),
 ('BVH', 'CTCP mã BVH (mô phỏng)', 'HOSE', 'Financials', '2013-05-08'),
@@ -190,7 +190,7 @@ insert into luyen_tap_w2.instruments (symbol, instrument_name, exchange, sector,
 ('VJC', 'CTCP mã VJC (mô phỏng)', 'HOSE', 'Industrials', '2007-02-13'),
 ('VNM', 'CTCP mã VNM (mô phỏng)', 'HOSE', 'Consumer Staples', '2019-01-05'),
 ('VPB', 'CTCP mã VPB (mô phỏng)', 'HOSE', 'Financials', '2011-04-25');
-insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
+insert into luyen_tap_w3.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
 ('LTO00068', 'LTA001', 'CTG', 'S', 5000, 35450, '2026-03-02 06:09:47+07:00', 'Partial'),
 ('LTO00061', 'LTA014', 'PLX', 'B', 1500, 39450, '2026-03-02 09:01:21+07:00', 'Rejected'),
 ('LTO00096', 'LTA019', 'SSI', 'B', 300, 30150, '2026-03-02 09:07:19+07:00', 'Filled'),
@@ -691,7 +691,7 @@ insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, p
 ('LTO00476', 'LTA010', 'GAS', 'B', 200, 67500, '2026-03-06 14:35:28+07:00', 'Rejected'),
 ('LTO00416', 'LTA014', 'VNM', 'S', 3000, 65700, '2026-03-06 14:40:59+07:00', 'Partial'),
 ('LTO00479', 'LTA019', 'BID', 'B', 200, 46450, '2026-03-06 14:44:01+07:00', 'Filled');
-insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
+insert into luyen_tap_w3.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
 ('LTO00505', 'LTA012', 'MSN', 'S', 2000, 77200, '2026-03-09 06:03:59+07:00', 'Filled'),
 ('LTO00593', 'LTA002', 'SSI', 'B', 2000, 29350, '2026-03-09 06:19:01+07:00', 'Cancelled'),
 ('LTO00540', 'LTA017', 'FPT', 'S', 500, 116700, '2026-03-09 09:01:31+07:00', 'Filled'),
@@ -1192,7 +1192,7 @@ insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, p
 ('LTO00994', 'LTA040', 'PLX', 'B', 3000, 39750, '2026-03-13 14:36:28+07:00', 'Filled'),
 ('LTO00926', 'LTA009', 'REE', 'S', 1000, 66600, '2026-03-13 14:37:46+07:00', 'Cancelled'),
 ('LTO00997', 'LTA010', 'BID', 'B', 3000, 46100, '2026-03-13 14:45:11+07:00', 'Filled');
-insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
+insert into luyen_tap_w3.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
 ('LTO01040', 'LTA018', 'POW', 'S', 500, 12050, '2026-03-16 06:15:28+07:00', 'Cancelled'),
 ('LTO01033', 'LTA038', 'BID', 'S', 200, 46050, '2026-03-16 09:00:38+07:00', 'Filled'),
 ('LTO01072', 'LTA030', 'VPB', 'B', 1000, 18800, '2026-03-16 09:01:17+07:00', 'Filled'),
@@ -1693,7 +1693,7 @@ insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, p
 ('LTO01404', 'LTA021', 'SSI', 'S', 3000, 28000, '2026-03-20 14:43:34+07:00', 'Filled'),
 ('LTO01417', 'LTA030', 'POW', 'B', 300, 11950, '2026-03-20 14:44:43+07:00', 'Filled'),
 ('LTO01435', 'LTA010', 'GAS', 'B', 300, 68900, '2026-03-20 14:45:06+07:00', 'Cancelled');
-insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
+insert into luyen_tap_w3.orders (order_id, account_id, symbol, side, quantity, price, order_ts, status) values
 ('LTO01550', 'LTA002', 'FPT', 'S', 300, 120000, '2026-03-23 09:01:01+07:00', 'Partial'),
 ('LTO01505', 'LTA038', 'BID', 'B', 500, 44350, '2026-03-23 09:02:04+07:00', 'Filled'),
 ('LTO01584', 'LTA037', 'FPT', 'B', 200, 118800, '2026-03-23 09:03:06+07:00', 'Filled'),
@@ -2194,7 +2194,7 @@ insert into luyen_tap_w2.orders (order_id, account_id, symbol, side, quantity, p
 ('LTO01952', 'LTA001', 'MBB', 'B', 1000, 22150, '2026-03-27 14:41:56+07:00', 'Rejected'),
 ('LTO01958', 'LTA012', 'CTG', 'B', 300, 36300, '2026-03-27 14:45:33+07:00', 'Filled'),
 ('LTO01997', 'LTA021', 'POW', 'B', 5000, 12450, '2026-03-27 14:45:37+07:00', 'Cancelled');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT00001', 'LTA001', '2026-02-27 10:00:00+07:00', 'DEPOSIT', 1013000000, null),
 ('LTT00002', 'LTA002', '2026-02-27 10:00:00+07:00', 'DEPOSIT', 3891000000, null),
 ('LTT00003', 'LTA003', '2026-02-27 10:00:00+07:00', 'DEPOSIT', 166000000, null),
@@ -2695,7 +2695,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT00498', 'LTA024', '2026-03-05 15:30:00+07:00', 'FEE', 29565, 'LTO00323'),
 ('LTT00499', 'LTA025', '2026-03-05 15:30:00+07:00', 'FEE', 161550, 'LTO00315'),
 ('LTT00500', 'LTA025', '2026-03-05 15:30:00+07:00', 'FEE', 53325, 'LTO00319');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT00501', 'LTA025', '2026-03-05 15:30:00+07:00', 'FEE', 160875, 'LTO00326'),
 ('LTT00502', 'LTA025', '2026-03-05 15:30:00+07:00', 'FEE', 33300, 'LTO00363'),
 ('LTT00503', 'LTA025', '2026-03-05 15:30:00+07:00', 'FEE', 90375, 'LTO00368'),
@@ -3196,7 +3196,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT00998', 'LTA021', '2026-03-10 15:30:00+07:00', 'TAX_SELL', 13920, 'LTO00609'),
 ('LTT00999', 'LTA021', '2026-03-10 15:30:00+07:00', 'TAX_SELL', 2420, 'LTO00631'),
 ('LTT01000', 'LTA021', '2026-03-10 15:30:00+07:00', 'TAX_SELL', 1200, 'LTO00632');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT01001', 'LTA021', '2026-03-10 15:30:00+07:00', 'TAX_SELL', 43650, 'LTO00643'),
 ('LTT01002', 'LTA025', '2026-03-10 15:30:00+07:00', 'FEE', 168750, 'LTO00648'),
 ('LTT01003', 'LTA025', '2026-03-10 15:30:00+07:00', 'FEE', 269250, 'LTO00664'),
@@ -3697,7 +3697,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT01498', 'LTA020', '2026-03-13 16:00:00+07:00', 'BUY_SETTLE', 230500000, 'LTO00776'),
 ('LTT01499', 'LTA021', '2026-03-13 16:00:00+07:00', 'BUY_SETTLE', 6915000, 'LTO00750'),
 ('LTT01500', 'LTA021', '2026-03-13 16:00:00+07:00', 'BUY_SETTLE', 6050000, 'LTO00751');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT01501', 'LTA021', '2026-03-13 16:00:00+07:00', 'BUY_SETTLE', 36800000, 'LTO00798'),
 ('LTT01502', 'LTA023', '2026-03-13 16:00:00+07:00', 'BUY_SETTLE', 3040000, 'LTO00704'),
 ('LTT01503', 'LTA023', '2026-03-13 16:00:00+07:00', 'SELL_SETTLE', 110750000, 'LTO00716'),
@@ -4198,7 +4198,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT01998', 'LTA024', '2026-03-18 16:00:00+07:00', 'SELL_SETTLE', 337000000, 'LTO01099'),
 ('LTT01999', 'LTA025', '2026-03-18 16:00:00+07:00', 'SELL_SETTLE', 45000000, 'LTO01081'),
 ('LTT02000', 'LTA027', '2026-03-18 16:00:00+07:00', 'BUY_SETTLE', 57800000, 'LTO01037');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT02001', 'LTA027', '2026-03-18 16:00:00+07:00', 'SELL_SETTLE', 3630000, 'LTO01071'),
 ('LTT02002', 'LTA028', '2026-03-18 16:00:00+07:00', 'BUY_SETTLE', 12220000, 'LTO01061'),
 ('LTT02003', 'LTA030', '2026-03-18 16:00:00+07:00', 'BUY_SETTLE', 8610000, 'LTO01050'),
@@ -4699,7 +4699,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT02498', 'LTA001', '2026-03-24 15:30:00+07:00', 'FEE', 163500, 'LTO01691'),
 ('LTT02499', 'LTA001', '2026-03-24 15:30:00+07:00', 'FEE', 48075, 'LTO01698'),
 ('LTT02500', 'LTA001', '2026-03-24 15:30:00+07:00', 'TAX_SELL', 18000, 'LTO01606');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT02501', 'LTA001', '2026-03-24 15:30:00+07:00', 'TAX_SELL', 61200, 'LTO01662'),
 ('LTT02502', 'LTA002', '2026-03-24 15:30:00+07:00', 'FEE', 21375, 'LTO01609'),
 ('LTT02503', 'LTA002', '2026-03-24 15:30:00+07:00', 'FEE', 6855, 'LTO01679'),
@@ -5200,7 +5200,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT02998', 'LTA017', '2026-03-27 15:30:00+07:00', 'TAX_SELL', 178950, 'LTO01988'),
 ('LTT02999', 'LTA017', '2026-03-27 15:30:00+07:00', 'TAX_SELL', 28150, 'LTO01990'),
 ('LTT03000', 'LTA019', '2026-03-27 15:30:00+07:00', 'FEE', 44250, 'LTO01916');
-insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
+insert into luyen_tap_w3.cash_txn (txn_id, account_id, txn_ts, txn_type, amount, ref_order_id) values
 ('LTT03001', 'LTA019', '2026-03-27 15:30:00+07:00', 'FEE', 33600, 'LTO01934'),
 ('LTT03002', 'LTA019', '2026-03-27 15:30:00+07:00', 'FEE', 9735, 'LTO01981'),
 ('LTT03003', 'LTA019', '2026-03-27 15:30:00+07:00', 'TAX_SELL', 29500, 'LTO01916'),
@@ -5409,7 +5409,7 @@ insert into luyen_tap_w2.cash_txn (txn_id, account_id, txn_ts, txn_type, amount,
 ('LTT03206', 'LTA038', '2026-03-31 16:00:00+07:00', 'SELL_SETTLE', 4420000, 'LTO01976'),
 ('LTT03207', 'LTA038', '2026-03-31 16:00:00+07:00', 'SELL_SETTLE', 114600000, 'LTO01991'),
 ('LTT03208', 'LTA038', '2026-03-31 16:00:00+07:00', 'SELL_SETTLE', 4420000, 'LTO02000');
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-02-27', 'LTA001', 'CTG', 9700, 0, 35400),
 ('2026-03-02', 'LTA001', 'CTG', 9800, 100, 35100),
 ('2026-03-03', 'LTA001', 'CTG', 10000, 300, 36000),
@@ -5910,7 +5910,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-10', 'LTA003', 'STB', 3000, 0, 35700),
 ('2026-03-11', 'LTA003', 'STB', 3000, 0, 35300),
 ('2026-03-12', 'LTA003', 'STB', 3000, 0, 35200);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-13', 'LTA003', 'STB', 3000, 0, 36000),
 ('2026-03-16', 'LTA003', 'STB', 3000, 0, 35550),
 ('2026-03-17', 'LTA003', 'STB', 3000, 0, 34900),
@@ -6411,7 +6411,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-11', 'LTA007', 'TCB', 3000, 0, 26050),
 ('2026-03-12', 'LTA007', 'TCB', 3000, 0, 25950),
 ('2026-03-13', 'LTA007', 'TCB', 1500, 0, 26600);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-16', 'LTA007', 'TCB', 1500, 0, 26950),
 ('2026-03-17', 'LTA007', 'TCB', 1500, 0, 26700),
 ('2026-03-18', 'LTA007', 'TCB', 1500, 0, 26400),
@@ -6912,7 +6912,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-19', 'LTA012', 'GAS', 3200, 0, 69900),
 ('2026-03-20', 'LTA012', 'GAS', 3200, 0, 69300),
 ('2026-03-23', 'LTA012', 'GAS', 3700, 500, 70000);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-24', 'LTA012', 'GAS', 3700, 500, 71400),
 ('2026-03-25', 'LTA012', 'GAS', 5000, 1300, 71500),
 ('2026-03-26', 'LTA012', 'GAS', 5000, 1300, 72800),
@@ -7413,7 +7413,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-19', 'LTA016', 'MBB', 3000, 500, 21650),
 ('2026-03-20', 'LTA016', 'MBB', 1500, 0, 21450),
 ('2026-03-23', 'LTA016', 'MBB', 1500, 0, 21600);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-24', 'LTA016', 'MBB', 1500, 0, 21950),
 ('2026-03-25', 'LTA016', 'MBB', 1000, 0, 21900),
 ('2026-03-26', 'LTA016', 'MBB', 500, 0, 22300),
@@ -7914,7 +7914,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-04', 'LTA019', 'SSI', 100, 0, 29650),
 ('2026-03-05', 'LTA019', 'SSI', 5100, 5000, 29000),
 ('2026-03-06', 'LTA019', 'SSI', 5100, 5000, 29050);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-09', 'LTA019', 'SSI', 5100, 0, 29250),
 ('2026-03-10', 'LTA019', 'SSI', 6100, 1000, 29100),
 ('2026-03-11', 'LTA019', 'SSI', 6100, 1000, 29000),
@@ -8415,7 +8415,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-02', 'LTA023', 'CTG', 6600, 0, 35100),
 ('2026-03-03', 'LTA023', 'CTG', 1600, 0, 36000),
 ('2026-03-04', 'LTA023', 'CTG', 1500, 0, 36600);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-05', 'LTA023', 'CTG', 1500, 0, 35800),
 ('2026-03-06', 'LTA023', 'CTG', 1500, 0, 36550),
 ('2026-03-09', 'LTA023', 'CTG', 1500, 0, 36500),
@@ -8916,7 +8916,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-12', 'LTA027', 'REE', 3100, 0, 66000),
 ('2026-03-13', 'LTA027', 'REE', 3100, 0, 65800),
 ('2026-03-16', 'LTA027', 'REE', 3100, 0, 65600);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-17', 'LTA027', 'REE', 3100, 0, 66300),
 ('2026-03-18', 'LTA027', 'REE', 3100, 0, 67400),
 ('2026-03-19', 'LTA027', 'REE', 3100, 0, 67600),
@@ -9417,7 +9417,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-11', 'LTA030', 'VHM', 1000, 0, 42400),
 ('2026-03-12', 'LTA030', 'VHM', 1000, 0, 43050),
 ('2026-03-13', 'LTA030', 'VHM', 1000, 0, 43100);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-16', 'LTA030', 'VHM', 1200, 200, 42400),
 ('2026-03-17', 'LTA030', 'VHM', 1200, 200, 42400),
 ('2026-03-18', 'LTA030', 'VHM', 1700, 500, 42600),
@@ -9918,7 +9918,7 @@ insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, tota
 ('2026-03-24', 'LTA037', 'CTG', 200, 0, 36650),
 ('2026-03-04', 'LTA037', 'FPT', 3000, 3000, 115900),
 ('2026-03-05', 'LTA037', 'FPT', 3000, 3000, 117500);
-insert into luyen_tap_w2.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
+insert into luyen_tap_w3.position_daily (snapshot_date, account_id, symbol, total_qty, receiving_qty, close_price) values
 ('2026-03-06', 'LTA037', 'FPT', 3000, 0, 119400),
 ('2026-03-09', 'LTA037', 'FPT', 3000, 0, 117300),
 ('2026-03-10', 'LTA037', 'FPT', 3500, 500, 116300),

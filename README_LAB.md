@@ -1,8 +1,8 @@
 # Finova Onboarding · Lab dbt trong Lakehouse
 
-Project lab đi đủ đường dữ liệu của Finova trên bộ dữ liệu tập `luyen_tap_w2`:
+Project lab đi đủ đường dữ liệu của Finova trên bộ dữ liệu tập `luyen_tap_w3`:
 staging → raw vault (hub, link, nhl, satellite) → view as-of → business vault (PIT, bridge) → gold.
-Giữ nguyên star schema tuần 2 (`models/marts/star_w2`) để so hai đường dựng gold.
+Giữ nguyên star schema tuần 2 (`models/marts/star_w3`) để so hai đường dựng gold.
 
 ## Cấu trúc
 
@@ -13,7 +13,7 @@ Giữ nguyên star schema tuần 2 (`models/marts/star_w2`) để so hai đườ
 | `models/asof` | as-of | view | Lọc phiên bản theo GUC `finova.asof_cutoff` |
 | `models/atomic/bv` | business vault | incremental, delete+insert theo `as_of_date` | `pit_customer_daily`, `bridge_customer_account` |
 | `models/marts/gold_dv` | gold | table, có contract | `dim_customer_dv`, `fact_order_dv` dựng từ vault |
-| `models/marts/star_w2` | gold | table | Star schema tuần 2 dựng thẳng từ staging |
+| `models/marts/star_w3` | gold | table | Star schema tuần 2 dựng thẳng từ staging |
 | `macros/dv` | — | — | Mẫu nạp `dv_hub`, `dv_link`, `dv_sat`; cửa sổ nạp; test `dv_*` |
 | `snapshots` | — | — | `snap_customer_current`: minh họa dbt snapshot |
 
