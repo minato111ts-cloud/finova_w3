@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: luyen_tap
     description: Dữ liệu raw mô phỏng tuần 3. Giữ nguyên như nguồn, không sửa trực tiếp.
-    schema: luyen_tap_w3
+    schema: hv04_source
     tables:
       - name: branches
         description: Cây tổ chức Hội sở → khu vực → chi nhánh → PGD.

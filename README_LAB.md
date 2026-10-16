@@ -6,16 +6,16 @@ Giữ nguyên star schema tuần 2 (`models/marts/star_w3`) để so hai đườ
 
 ## Cấu trúc
 
-| Thư mục | Tầng | Vật chất hóa | Nội dung |
-|---|---|---|---|
-| `models/staging/luyen_tap` | staging | view | Luật cứng, khóa băm `*_hk`, `*_hd`, `ingested_ts` giả lập |
-| `models/atomic/raw` | raw vault | incremental, append | `hub_customer`, `hub_account`, `hub_instrument`, `link_customer_account`, `nhl_order`, 3 satellite |
-| `models/asof` | as-of | view | Lọc phiên bản theo GUC `finova.asof_cutoff` |
-| `models/atomic/bv` | business vault | incremental, delete+insert theo `as_of_date` | `pit_customer_daily`, `bridge_customer_account` |
-| `models/marts/gold_dv` | gold | table, có contract | `dim_customer_dv`, `fact_order_dv` dựng từ vault |
-| `models/marts/star_w3` | gold | table | Star schema tuần 2 dựng thẳng từ staging |
-| `macros/dv` | — | — | Mẫu nạp `dv_hub`, `dv_link`, `dv_sat`; cửa sổ nạp; test `dv_*` |
-| `snapshots` | — | — | `snap_customer_current`: minh họa dbt snapshot |
+| Thư mục                    | Tầng           | Vật chất hóa                                 | Nội dung                                                                                           |
+| -------------------------- | -------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `models/staging/luyen_tap` | staging        | view                                         | Luật cứng, khóa băm `*_hk`, `*_hd`, `ingested_ts` giả lập                                          |
+| `models/atomic/raw`        | raw vault      | incremental, append                          | `hub_customer`, `hub_account`, `hub_instrument`, `link_customer_account`, `nhl_order`, 3 satellite |
+| `models/asof`              | as-of          | view                                         | Lọc phiên bản theo GUC `finova.asof_cutoff`                                                        |
+| `models/atomic/bv`         | business vault | incremental, delete+insert theo `as_of_date` | `pit_customer_daily`, `bridge_customer_account`                                                    |
+| `models/marts/gold_dv`     | gold           | table, có contract                           | `dim_customer_dv`, `fact_order_dv` dựng từ vault                                                   |
+| `models/marts/star_w3`     | gold           | table                                        | Star schema tuần 2 dựng thẳng từ staging                                                           |
+| `macros/dv`                | —              | —                                            | Mẫu nạp `dv_hub`, `dv_link`, `dv_sat`; cửa sổ nạp; test `dv_*`                                     |
+| `snapshots`                | —              | —                                            | `snap_customer_current`: minh họa dbt snapshot                                                     |
 
 `ingested_ts` của bài lab là giả lập: 22:00 ngày nghiệp vụ, giờ Việt Nam (HEL-001 Phụ lục D.3).
 Ở Finova thật, loader gán `ingested_ts` lúc ghi landing; dbt không bao giờ tự sinh.
@@ -42,13 +42,13 @@ Hai WARN là có chủ đích: `hub_account` có LTA099 và `hub_instrument` có
 
 ## Con số đối chiếu
 
-| Bảng | Số dòng |
-|---|---|
-| hub_customer / hub_account / hub_instrument | 30 / 41 / 32 |
-| link_customer_account / nhl_order | 40 / 2.000 |
-| sat_customer / sat_account / sat_instrument | 44 / 40 / 31 |
-| pit_customer_daily (21 ngày) / bridge_customer_account | 630 / 840 |
-| dim_customer_dv / fact_order_dv | 45 / 2.000 |
+| Bảng                                                   | Số dòng      |
+| ------------------------------------------------------ | ------------ |
+| hub_customer / hub_account / hub_instrument            | 30 / 41 / 32 |
+| link_customer_account / nhl_order                      | 40 / 2.000   |
+| sat_customer / sat_account / sat_instrument            | 44 / 40 / 31 |
+| pit_customer_daily (21 ngày) / bridge_customer_account | 630 / 840    |
+| dim_customer_dv / fact_order_dv                        | 45 / 2.000   |
 
 `fact_order_dv` và `fact_order` (tuần 2) gắn cùng phân khúc tại ngày đặt lệnh cho cả 2.000 lệnh; 153 lệnh không có phiên bản khách (95 lệnh khớp, 5.798.940.000 đồng).
 
