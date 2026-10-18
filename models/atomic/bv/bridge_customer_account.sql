@@ -6,9 +6,11 @@
     pre_hook="{{ asof_set_session() }}"
 ) }}
 select
-    current_setting('finova.asof_date')::date            as as_of_date,
+    {{ get_asof_date() }}   as as_of_date,
     l.account_hk,
     l.customer_hk,
     l.link_customer_account_hk,
-    current_setting('finova.asof_cutoff')::timestamptz   as cutoff_ts
+    {{ get_asof_cutoff() }} as cutoff_ts
 from {{ ref('asof__link_customer_account') }} l
+where l.ingested_ts <= {{ get_asof_cutoff() }}
+

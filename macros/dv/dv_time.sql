@@ -39,6 +39,16 @@ select
              false)
 {%- endmacro %}
 
+{#- Đọc ngày D và cutoff từ phiên; tách thành macro để có thể override trong unit_tests -#}
+{% macro get_asof_date() -%}
+current_setting('finova.asof_date')::date
+{%- endmacro %}
+
+{% macro get_asof_cutoff() -%}
+current_setting('finova.asof_cutoff')::timestamptz
+{%- endmacro %}
+
+
 {#- Khóa băm Data Vault: mỗi khóa nghiệp vụ đi kèm mã hệ thống bkcc (ADR-016 Q7; link theo DEC-ELT-LINKHK) -#}
 {% macro dv_hk(bk_cols) -%}
 {%- set parts = [] -%}
@@ -48,3 +58,7 @@ select
 {%- endfor -%}
 {{ hash_key(parts) }}
 {%- endmacro %}
+
+
+
+-- dbt build --selector lab_bv --vars "{as_of_date: '2026-03-27'}"

@@ -4,6 +4,8 @@
 -- Chạy: psql -v ON_ERROR_STOP=1 -f w3_raw_hv04_source.sql   (hoặc mở trong DBeaver, Execute Script)
 -- Sinh bằng gen_w3_data.py, seed 20261005. Không phải dữ liệu khách hàng thật.
 -- =============================================================================
+\encoding UTF8
+set client_encoding = 'UTF8';
 drop schema if exists hv04_source cascade;
 create schema hv04_source;
 
