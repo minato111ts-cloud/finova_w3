@@ -41,3 +41,36 @@ unit_tests:
           cutoff_ts: "2026-03-11 06:00:00+07"
         - as_of_date: "2026-03-10"
           cutoff_ts: "2026-03-11 06:00:00+07"
+
+  - name: ut_hv04_bridge_nap_lai_khong_sinh_dong_trung
+    description: "HV4 Unit Test (B3 - Ca nạp lại): Cùng tài khoản xuất hiện lại ở lô sau, trước thời điểm cutoff không sinh dòng trùng trong bridge ngày D"
+    model: bridge_customer_account
+    overrides:
+      macros:
+        is_incremental: true
+        get_asof_date: "'2026-03-10'::date"
+        get_asof_cutoff: "'2026-03-11 06:00:00+07'::timestamptz"
+    given:
+      - input: ref('asof__link_customer_account')
+        rows:
+          # Lần 1: Liên kết tài khoản \x21 xuất hiện ngày 05/03
+          - link_customer_account_hk: '\x01'
+            customer_hk: '\x11'
+            account_hk: '\x21'
+            ingested_ts: "2026-03-05 22:00:00+07"
+            event_ts: "2026-03-05 00:00:00+07"
+            record_source: "luyen_tap.accounts"
+
+          # Lần 2 (Nạp lại): Cùng liên kết tài khoản \x21 xuất hiện lại ngày 10/03 (trước cutoff)
+          - link_customer_account_hk: '\x01'
+            customer_hk: '\x11'
+            account_hk: '\x21'
+            ingested_ts: "2026-03-10 22:00:00+07"
+            event_ts: "2026-03-10 00:00:00+07"
+            record_source: "luyen_tap.accounts"
+
+    expect:
+      rows:
+        - as_of_date: "2026-03-10"
+          cutoff_ts: "2026-03-11 06:00:00+07"
+
